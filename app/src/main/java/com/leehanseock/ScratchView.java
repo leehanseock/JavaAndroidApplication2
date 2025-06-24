@@ -9,7 +9,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View; // 이 줄을 추가해야 합니다.
+import android.view.View;
+import android.graphics.BitmapFactory;
 
 
 import androidx.annotation.Nullable;
@@ -26,6 +27,8 @@ public class ScratchView extends View {
     private boolean revealed = false; // 이미지가 완전히 공개되었는지 여부
     private static final float REVEAL_THRESHOLD = 70.0f; // 스크래치 완료 임계값 (70%)
 
+    private Bitmap scratchLayerImageBitmap;
+
     public ScratchView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -41,8 +44,8 @@ public class ScratchView extends View {
         scratchPaint.setStyle(Paint.Style.STROKE); // 스트로크 스타일
         scratchPaint.setStrokeJoin(Paint.Join.ROUND); // 선 끝 조인 라운드
         scratchPaint.setStrokeCap(Paint.Cap.ROUND);   // 선 끝 캡 라운드
-        scratchPaint.setStrokeWidth(100); // 스크래치 브러시 크기 조정
-
+        scratchPaint.setStrokeWidth(130); // 스크래치 브러시 크기 조정
+        scratchLayerImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gradation01);
         scratchPath = new Path();
     }
 
@@ -53,7 +56,13 @@ public class ScratchView extends View {
         scratchBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         scratchCanvas = new Canvas(scratchBitmap);
         // scratchBitmap을 초기 스크래치 가능한 색상/이미지로 채웁니다.
-        scratchCanvas.drawColor(Color.LTGRAY); // 또는 드로어블/이미지 그리기
+        if (scratchLayerImageBitmap != null) {
+            // 이미지를 뷰 크기에 맞춰 스케일링하여 그립니다.
+            scratchCanvas.drawBitmap(Bitmap.createScaledBitmap(scratchLayerImageBitmap, w, h, true), 0, 0, null);
+        } else {
+            // 이미지가 로드되지 않았다면, 기본 색상으로 채웁니다. (폴백)
+            scratchCanvas.drawColor(Color.LTGRAY);
+        } // 또는 드로어블/이미지 그리기
     }
 
     @Override
@@ -168,6 +177,21 @@ public class ScratchView extends View {
         }
 
         return (float) transparentPixels / (width * height) * 100.0f;
+    }
+    public interface OnScratchListener {
+        void onScratch(float percentage);
+    }
+
+    private OnScratchListener scratchListener;
+
+    public void setOnScratchListener(OnScratchListener listener) {
+        this.scratchListener = listener;
+    }
+
+    private void onScratchPercentageChanged(float percentage) {
+        if (scratchListener != null) {
+            scratchListener.onScratch(percentage);
+        }
     }
 
 }
