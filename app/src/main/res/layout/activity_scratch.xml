@@ -7,8 +7,9 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="#FFE0B2"
-    tools:context=".ScratchActivity"> <TextView
+    android:background="@drawable/bg2"
+    tools:context=".ScratchActivity">
+    <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="오늘의 행운 메시지를 스크래치하세요!"

@@ -25,7 +25,7 @@ public class ScratchView extends View {
     private float lastTouchX, lastTouchY;
 
     private boolean revealed = false; // 이미지가 완전히 공개되었는지 여부
-    private static final float REVEAL_THRESHOLD = 70.0f; // 스크래치 완료 임계값 (70%)
+    private static final float REVEAL_THRESHOLD = 60.0f; // 스크래치 완료 임계값 (60%)
 
     private Bitmap scratchLayerImageBitmap;
 
@@ -37,8 +37,8 @@ public class ScratchView extends View {
     private void init() {
         // 지우기 위한 scratchPaint 초기화
         scratchPaint = new Paint();
-        scratchPaint.setAlpha(0); // Xfermode를 사용하기 위해 투명하게 만듭니다.
-        scratchPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR)); // 픽셀을 지웁니다.
+        scratchPaint.setAlpha(0);
+        scratchPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         scratchPaint.setAntiAlias(true); // 안티 앨리어싱
         scratchPaint.setDither(true);    // 디더링
         scratchPaint.setStyle(Paint.Style.STROKE); // 스트로크 스타일
@@ -55,22 +55,17 @@ public class ScratchView extends View {
         // 뷰 크기만큼 scratchBitmap 생성
         scratchBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         scratchCanvas = new Canvas(scratchBitmap);
-        // scratchBitmap을 초기 스크래치 가능한 색상/이미지로 채웁니다.
+        // scratchBitmap을 초기 스크래치 가능한 색상/이미지로 채우기
         if (scratchLayerImageBitmap != null) {
-            // 이미지를 뷰 크기에 맞춰 스케일링하여 그립니다.
             scratchCanvas.drawBitmap(Bitmap.createScaledBitmap(scratchLayerImageBitmap, w, h, true), 0, 0, null);
         } else {
-            // 이미지가 로드되지 않았다면, 기본 색상으로 채웁니다. (폴백)
             scratchCanvas.drawColor(Color.LTGRAY);
-        } // 또는 드로어블/이미지 그리기
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        // 여기에서 표시될 콘텐츠를 그립니다 (예: 이미지)
-        // 간단히 말해, 부모 레이아웃 또는 아래의 다른 뷰에 의해 그려진다고 가정합니다.
-
         // revealed 상태에 따라 스크래치 레이어를 그릴지 결정
         if (!revealed) {
             canvas.drawBitmap(scratchBitmap, 0, 0, null);
@@ -79,11 +74,11 @@ public class ScratchView extends View {
         // else: revealed가 true면 스크래치 레이어를 그리지 않으므로 숨겨진 이미지가 완전히 보임
     }
 
-    private float touchTolerance = 4; // 터치 허용 오차 (선택 사항)
+    private float touchTolerance = 4;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (revealed) { // 이미 공개되었다면 더 이상 터치 이벤트를 처리하지 않음
+        if (revealed) {
             return false;
         }
 
@@ -120,7 +115,7 @@ public class ScratchView extends View {
     }
 
     /**
-     * 스크래치된 비율을 확인하고, 임계값을 넘으면 이미지를 완전히 공개합니다.
+     * 스크래치된 비율을 확인하고, 임계값을 넘으면 이미지를 공개
      */
     private void checkRevealStatus() {
         float transparentPercentage = getTransparentPixelPercentage();
@@ -130,12 +125,12 @@ public class ScratchView extends View {
             if (onScratchCompleteListener != null) {
                 onScratchCompleteListener.onScratchComplete();
             }
-            // confetti 애니메이션 등의 추가 효과를 여기에서 트리거할 수 있습니다.
+            // confetti 애니메이션 등의 추가 효과를 여기에서 트리거
             invalidate(); // 즉시 다시 그려 스크래치 레이어를 사라지게 함
         }
     }
 
-    // 스크래치 완료 리스너 인터페이스 (선택 사항)
+    // 스크래치 완료 리스너 인터페이스
     public interface OnScratchCompleteListener {
         void onScratchComplete();
     }
@@ -149,9 +144,8 @@ public class ScratchView extends View {
     // 스크래치 뷰 초기화 (리셋) 메서드 추가
     public void resetScratchView() {
         revealed = false;
-        // scratchBitmap을 다시 채워 초기 상태로 되돌립니다.
         if (scratchBitmap != null) {
-            scratchBitmap.eraseColor(Color.LTGRAY); // 또는 초기 이미지 다시 그리기
+            scratchBitmap.eraseColor(Color.LTGRAY);
         }
         scratchPath.reset();
         invalidate();
@@ -169,9 +163,7 @@ public class ScratchView extends View {
 
         int transparentPixels = 0;
         for (int pixel : pixels) {
-            // ARGB_8888 포맷에서 알파 값은 최상위 8비트
-            // Color.TRANSPARENT는 알파 값이 0x00xxxxxx
-            if (Color.alpha(pixel) == 0x00) { // 완전히 투명한 픽셀인지 확인
+            if (Color.alpha(pixel) == 0x00) {
                 transparentPixels++;
             }
         }
